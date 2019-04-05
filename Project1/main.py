@@ -3,18 +3,21 @@
 import random
 import  os
 import numpy
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 
 #retrive the dictionary
 def getDict():
     dic = {}
     with open("points3D.txt","r") as n:
-        for line in n:
-            a = line.split(" ")
-            temp = []
-            temp.append(float(a[1]))
-            temp.append(float(a[2]))
-            temp.append(float(a[3]))
-            dic[int(a[0])] = temp[:]
+        for i, line in enumerate(n):
+            if i>2:
+                a = line.split(" ")
+                temp = []
+                temp.append(float(a[1]))
+                temp.append(float(a[2]))
+                temp.append(float(a[3]))
+                dic[int(a[0])] = temp[:]
     return dic
 
 #get the plane function by three point
@@ -31,15 +34,15 @@ def getDistance(a,b,c,d,p): #ax+by+cz+d, where p is the point
     down = (a*a+b*b+c*c)**0.5
     return up/down
 
-#count how many point are statisfied the rule that the distance should be less than threhold
-def evaluatePlane(a,b,c,d,threhold,dic):
+#count how many point are statisfied the rule that the distance should be less than threshold
+def evaluatePlane(a,b,c,d,threshold,dic):
     count = 0
     for point in list(dic.values()):
-        if getDistance(a,b,c,d,point) < threhold:
+        if getDistance(a,b,c,d,point) < threshold:
             count += 1
     return count
 
-def randomChoose(dic, threhold, iter): #threhold is the allowable distance between points and plane
+def randomChoose(dic, threshold, iter): #threshold is the allowable distance between points and plane
     maxCount = 0
     dlist = list(dic.values())#dict values
     bestParam = [] # a,b,c,d
@@ -48,12 +51,24 @@ def randomChoose(dic, threhold, iter): #threhold is the allowable distance betwe
         p2 = random.randint(1, len(dic))
         p3 = random.randint(1, len(dic))
         a,b,c,d = getSpaceFunction(dlist[p1], dlist[p2], dlist[p3])# get plane function
-        thisCount = evaluatePlane(a,b,c,d,threhold,dic) #count the number of good points
+        thisCount = evaluatePlane(a,b,c,d,threshold,dic) #count the number of good points
         if thisCount > maxCount:
             maxCount = thisCount
             bestParam = [a,b,c,d]
     return maxCount,bestParam
 
+def plot3D(dic, best_para, threshold):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    for k in dic:
+        if getDistance(para[0],para[1],para[2],para[3],dic[k]) < threshold:
+            ax.scatter(dic[k][0], dic[k][1], dic[k][2], c='r', s = 5)
+        else:
+            ax.scatter(dic[k][0], dic[k][1], dic[k][2], c='b', s= 5)
+    fig.savefig('3Dplots.pdf')
 
 #************** main function ****************
 
@@ -61,38 +76,8 @@ def randomChoose(dic, threhold, iter): #threhold is the allowable distance betwe
 #a,b,c,d = getSpaceFunction([0,0,0],[1,0,0],[1,1,0])
 #print getDistance(a,b,c,d,[1,1,1])
 dic = getDict()
-count, para = randomChoose(dic,0.1, 20)
-print count
-print para
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+count, para = randomChoose(dic, 0.1, 3000)
+print(count)
+print(para)
+plot3D(dic, para, 0.1)
 #end
