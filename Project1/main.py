@@ -4,6 +4,7 @@ import random
 import  os
 import numpy
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.pyplot as plt
 
 #retrive the dictionary
@@ -42,6 +43,7 @@ def evaluatePlane(a,b,c,d,threshold,dic):
             count += 1
     return count
 
+# RANDSAC
 def randomChoose(dic, threshold, iter): #threshold is the allowable distance between points and plane
     maxCount = 0
     dlist = list(dic.values())#dict values
@@ -57,6 +59,8 @@ def randomChoose(dic, threshold, iter): #threshold is the allowable distance bet
             bestParam = [a,b,c,d]
     return maxCount,bestParam
 
+# Step5
+# plot the reconstruction points with different colors for inliners and outliners
 def plot3D(dic, best_para, threshold):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -69,15 +73,40 @@ def plot3D(dic, best_para, threshold):
         else:
             ax.scatter(dic[k][0], dic[k][1], dic[k][2], c='b', s= 5)
     fig.savefig('3Dplots.pdf')
+    return fig
 
+# Step7
+# draw a 3D box
+def drawBox(sidelen):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    cube_mtarix = numpy.array([[-1, -1, 0], [1, -1, 0], [1, 1, 0], [-1, 1, 0], [-1, -1, 2], [1, -1, 2], [1, 1, 2], [-1, 1, 2]])
+    vertexes = sidelen/2*cube_mtarix
+    ax.scatter3D(vertexes[:, 0], vertexes[:, 1], vertexes[:, 2], c='b', s = 5)
+    ax.scatter3D(0, 0, 0, c='r', s = 5)
+    edges = [[vertexes[0],vertexes[1],vertexes[2],vertexes[3]],[vertexes[4],vertexes[5],vertexes[6],vertexes[7]], [vertexes[0],vertexes[3],vertexes[7],vertexes[4]], [vertexes[1],vertexes[2],vertexes[6],vertexes[5]], [vertexes[0],vertexes[1],vertexes[5],vertexes[4]],[vertexes[2],vertexes[3],vertexes[7],vertexes[6]]]
+    # faces = Poly3DCollection(edges, linewidths=1, edgecolors='k')
+    # faces.set_facecolor((0,0,1,0.1))
+    colors = [(0.4,0.4,0.5,0.5),(0.5,0.7,1,0.5),(0.5,1,0.5,0.5),(1,0.7,0,0.5),(1,0.7,0.7,0.5),(0.6,0.4,1,0.5)]
+    for i in range(6):
+        f = [edges[i]]
+        face = Poly3DCollection(f, linewidths=1, edgecolors='k')
+        face.set_facecolor(colors[i])
+        ax.add_collection3d(face)
+    plt.show()
 #************** main function ****************
 
 #print getSpaceFunction([0,0,0],[1,0,0],[1,1,0])
 #a,b,c,d = getSpaceFunction([0,0,0],[1,0,0],[1,1,0])
 #print getDistance(a,b,c,d,[1,1,1])
-dic = getDict()
-count, para = randomChoose(dic, 0.1, 3000)
-print(count)
-print(para)
-plot3D(dic, para, 0.1)
+
+# dic = getDict()
+# count, para = randomChoose(dic, 0.1, 3000)
+# print(count)
+# print(para)
+# plot3D(dic, para, 0.1)
+drawBox(1)
 #end
