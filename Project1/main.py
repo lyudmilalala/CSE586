@@ -6,6 +6,8 @@ import numpy
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.pyplot as plt
+from PIL import Image
+import read_model
 
 #retrive the dictionary
 def getDict():
@@ -67,11 +69,12 @@ def plot3D(dic, best_para, threshold):
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
+    ax.view_init(30, 30)
     for k in dic:
         if getDistance(para[0],para[1],para[2],para[3],dic[k]) < threshold:
-            ax.scatter(dic[k][0], dic[k][1], dic[k][2], c='r', s = 5)
+            ax.scatter3D(dic[k][0], dic[k][1], dic[k][2], c='r', s = 5)
         else:
-            ax.scatter(dic[k][0], dic[k][1], dic[k][2], c='b', s= 5)
+            ax.scatter3D(dic[k][0], dic[k][1], dic[k][2], c='b', s= 5)
     fig.savefig('3Dplots.pdf')
     return fig
 
@@ -97,6 +100,33 @@ def drawBox(sidelen):
         face.set_facecolor(colors[i])
         ax.add_collection3d(face)
     plt.show()
+    return vertexes
+
+# 3D to 2D with pinhole camera model
+# c = (cx, cy, cz)
+# vertexes = eight vertexes of the cube
+def to2D(c, vetexes):
+    cameras, images, points3D = read_model.read_model("/Users/jennydeng/Desktop/class/CSE586/CSE586/Project1", ".txt")
+    width = cameras[1].width
+    height = cameras[1].height
+    focus = cameras[1].params[0]
+    fpToPixel = numpy.array([[1, 0, width/2], [0, 1, height/2], [0, 0, 1]])
+    translation = numpy.array([[1, 0, 0, -1*c[0]], [0, 1, 0, -1*c[1]], [0, 0, 1, -1*c[2]], [0, 0, 0, 1]])
+    presectiveProjection = numpy.array([[focus, 0, 0, 0], [0, focus, 0, 0], [0, 0, 1, 0]])
+    for m in images:
+        plist = []
+        R = qvec2rotmat(images[m].qvec)
+        rotation = numpy.array([[R[0][0], R[0][1], R[0][2], 0], [R[1][0], R[1][1], R[1][2], 0], [R[2][0], R[2][1], R[2][2], 0], [0, 0, 0, 1]])
+        for v in vertexes:
+            worldPoint = numpy.array([[v[0]],[v[1]],[v[2]],[1]])
+            pixelLoc = numpy.matmul(numpy.matmul(numpy.matmul(fpToPixel, presectiveProjection), numpy.matmul(rotation, translation)), worldPoint)
+            plist.append(aixelLoc)
+        draw2D(images[m].id, plist)
+
+def draw2D(img_id, pixels):
+    #TODO
+    return 0
+
 #************** main function ****************
 
 #print getSpaceFunction([0,0,0],[1,0,0],[1,1,0])
@@ -104,9 +134,11 @@ def drawBox(sidelen):
 #print getDistance(a,b,c,d,[1,1,1])
 
 # dic = getDict()
-# count, para = randomChoose(dic, 0.1, 3000)
+# count, para = randomChoose(dic, 0.1, 300)
 # print(count)
 # print(para)
-# plot3D(dic, para, 0.1)
-drawBox(1)
+plot3D(dic, para, 0.1)
+# vlist = drawBox(1)
+# to2D((0,0,0), vlist)
+
 #end
