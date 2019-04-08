@@ -5,6 +5,8 @@ import  os
 import numpy
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt
 # from PIL import Image
 import read_model
@@ -120,11 +122,28 @@ def to2D(c, vetexes):
         for v in vertexes:
             worldPoint = numpy.array([[v[0]],[v[1]],[v[2]],[1]])
             pixelLoc = numpy.matmul(numpy.matmul(numpy.matmul(fpToPixel, presectiveProjection), numpy.matmul(rotation, translation)), worldPoint)
-            plist.append(aixelLoc)
+            plist.append(pixelLoc)
         draw2D(images[m].id, plist)
 
 def draw2D(img_id, pixels):
-    #TODO
+    img = plt.imread('samples/'+str(img_id)+".jpg")
+    fig, ax = plt.subplots()
+    ax.imshow(img)
+    bottom = Polygon(numpy.array([pixels[0],pixels[1],pixels[2],pixels[3]]), True, linewidth=1, edgecolor='k', facecolor = [0.4,0.4,0.5,1])
+    ax.add_patch(bottom)
+    back = Polygon(numpy.array([pixels[3],pixels[2],pixels[6],pixels[7]]), True, linewidth=1, edgecolor='k', facecolor = [0.6,0.4,1,1])
+    ax.add_patch(back)
+    left = Polygon(numpy.array([pixels[0],pixels[3],pixels[7],pixels[4]]), True, linewidth=1, edgecolor='k', facecolor = [1,0.7,0,1])
+    ax.add_patch(left)
+    top = Polygon(numpy.array([pixels[4],pixels[5],pixels[6],pixels[7]]), True, linewidth=1, edgecolor='k', facecolor = [0.2,0.4,1,0.7])
+    ax.add_patch(top)
+    right = Polygon(numpy.array([pixels[1],pixels[2],pixels[6],pixels[5]]), True, linewidth=1, edgecolor='k', facecolor = [0.5,1,0.5,0.7])
+    ax.add_patch(right)
+    front = Polygon(numpy.array([pixels[0],pixels[1],pixels[5],pixels[4]]), True, linewidth=1, edgecolor='k', facecolor = [1,0.7,0.7,0.7])
+    ax.add_patch(front)
+    if not os.path.exists('2Dresults'):
+        os.makedirs('2Dresults')
+    plt.savefig('2Dresults/'+str(img_id)+'.png')
     return 0
 
 #************** main function ****************
@@ -138,7 +157,8 @@ def draw2D(img_id, pixels):
 # print(count)
 # print(para)
 # plot3D(dic, para, 0.1)
-vlist = drawBox(1)
+# vlist = drawBox(1)
 # to2D((0,0,0), vlist)
+draw2D(1,numpy.array([[3000,3500],[4000, 3500],[4866, 3200],[3866, 3200],[3000, 2500],[4000, 2500],[4866, 2200],[3866, 2200]]))
 
 #end
