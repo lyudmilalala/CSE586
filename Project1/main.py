@@ -6,7 +6,7 @@ import numpy
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.pyplot as plt
-from PIL import Image
+# from PIL import Image
 import read_model
 
 #retrive the dictionary
@@ -137,8 +137,8 @@ def draw2D(img_id, pixels):
 # count, para = randomChoose(dic, 0.1, 300)
 # print(count)
 # print(para)
-plot3D(dic, para, 0.1)
-# vlist = drawBox(1)
+# plot3D(dic, para, 0.1)
+vlist = drawBox(1)
 # to2D((0,0,0), vlist)
 
 #end
