@@ -152,13 +152,13 @@ def draw2D(img_id, pixels):
 #a,b,c,d = getSpaceFunction([0,0,0],[1,0,0],[1,1,0])
 #print getDistance(a,b,c,d,[1,1,1])
 
-# dic = getDict()
-# count, para = randomChoose(dic, 0.1, 300)
-# print(count)
-# print(para)
-# plot3D(dic, para, 0.1)
+dic = getDict()
+count, para = randomChoose(dic, 0.1, 300)
+print(count)
+print(para)
+plot3D(dic, para, 0.1)
 # vlist = drawBox(1)
 # to2D((0,0,0), vlist)
-draw2D(1,numpy.array([[3000,3500],[4000, 3500],[4866, 3200],[3866, 3200],[3000, 2500],[4000, 2500],[4866, 2200],[3866, 2200]]))
+# draw2D(1,numpy.array([[3000,3500],[4000, 3500],[4866, 3200],[3866, 3200],[3000, 2500],[4000, 2500],[4866, 2200],[3866, 2200]]))
 
 #end
