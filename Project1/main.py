@@ -115,7 +115,7 @@ def drawBox(sidelen):
         face = Poly3DCollection(f, linewidths=1, edgecolors='k')
         face.set_facecolor(colors[i])
         ax.add_collection3d(face)
-    plt.show()
+    fig.savefig('box.pdf')
     return vertexes
 
 # 3D to 2D with pinhole camera model
@@ -133,15 +133,19 @@ def modifyImages(c, vertexes):
         R = qvec2rotmat(images[m].qvec)
         rotation = numpy.array([[R[0][0], R[0][1], R[0][2], 0], [R[1][0], R[1][1], R[1][2], 0], [R[2][0], R[2][1], R[2][2], 0], [0, 0, 0, 1]])
         to2D(m, vertexes, fpToPixel, presectiveProjection, rotation, translation)
+        draw2D(images[m].id, plist)
 
-def to2D(img_id, vertexes, fpToPixel, rotation, translation):
+def to2D(img_id, vertexes, fpToPixel, presectiveProjection, rotation, translation):
     plist = []
     for v in vertexes:
         worldPoint = numpy.array([[v[0]],[v[1]],[v[2]],[1]])
-        pixelLoc = numpy.matmul(numpy.matmul(numpy.matmul(fpToPixel, presectiveProjection), numpy.matmul(rotation, translation)), worldPoint)
+        p = numpy.dot(numpy.dot(numpy.dot(fpToPixel, presectiveProjection), numpy.dot(rotation, translation)), worldPoint)
+        x = p[0]/p[2]
+        y = p[1]/p[2]
+        pixelLoc = [x, y]
+        # print(pixelLoc)
         plist.append(pixelLoc)
-    draw2D(images[m].id, plist)
-    print(plist)
+    return plist
 
 def draw2D(img_id, pixels):
     img = plt.imread('samples/'+str(img_id)+".jpg")
@@ -170,15 +174,18 @@ def draw2D(img_id, pixels):
 #a,b,c,d = getSpaceFunction([0,0,0],[1,0,0],[1,1,0])
 #print getDistance(a,b,c,d,[1,1,1])
 
-dic = getDict()
-count, para = randomChoose(dic, 0.1, 500)
-print(count)
-print(para)
-plot3D(dic, para, 0.1, '3Dplots.pdf')
-para2, dic2 = correctPlane(para, dic)
-plot3D(dic2, para2, 0.05, '3Dplots_modified.pdf')
-# vlist = drawBox(1)
-# modifyImages((0,0,0), vlist)
-# draw2D(1,numpy.array([[3000,3500],[4000, 3500],[4866, 3200],[3866, 3200],[3000, 2500],[4000, 2500],[4866, 2200],[3866, 2200]]))
+# dic = getDict()
+# count, para = randomChoose(dic, 0.1, 500)
+# print(para)
+# c = [1, 1]
+# z = -1*(para[0]+para[1]+para[3])/para[2]
+# c.append(z)
+# plot3D(dic, para, 0.1, '3Dplots.pdf')
+# para2, dic2 = correctPlane(para, dic)
+# plot3D(dic2, para2, 0.1, '3Dplots_modified.pdf')
+# vlist = drawBox(500)
+# print(vlist)
+# modifyImages(c, vlist)
+draw2D(1,numpy.array([[3000,3500],[4000, 3500],[4866, 3200],[3866, 3200],[3000, 2500],[4000, 2500],[4866, 2200],[3866, 2200]]))
 
 #end
