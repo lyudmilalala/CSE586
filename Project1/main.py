@@ -65,7 +65,7 @@ def randomChoose(dic, threshold, iter): #threshold is the allowable distance bet
 
 # Step5
 # plot the reconstruction points with different colors for inliners and outliners
-def plot3D(dic, best_para, threshold):
+def plot3D(dic, para, threshold, outfile):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.set_xlabel('X Label')
@@ -77,8 +77,22 @@ def plot3D(dic, best_para, threshold):
             ax.scatter3D(dic[k][0], dic[k][1], dic[k][2], c='r', s = 5)
         else:
             ax.scatter3D(dic[k][0], dic[k][1], dic[k][2], c='b', s= 5)
-    fig.savefig('3Dplots.pdf')
+    fig.savefig(outfile)
     return fig
+
+# Step6
+def correctPlane(para,dic):
+    ans = {}
+    a = para[0]
+    b = para[1]
+    c = para[2]
+    d = para[3]
+    matrix = [[1,0,(a*c)**2/(c+1)-a*c],[0,1,(c*b)**2/(c+1)-b*c],[(a*c)**2/(c+1)-a*c,(c*b)**2/(c+1)-b*c,1-b*c]]
+    mat = numpy.asmatrix(matrix)
+    for key in dic.keys():
+        a = mat * numpy.asmatrix(dic[key]).T
+        ans[key] = numpy.asarray((mat * numpy.asmatrix(dic[key]).T -c).T)[0]
+    return [0,0,1,0],ans
 
 # Step7
 # draw a 3D box
@@ -107,7 +121,7 @@ def drawBox(sidelen):
 # 3D to 2D with pinhole camera model
 # c = (cx, cy, cz)
 # vertexes = eight vertexes of the cube
-def to2D(c, vetexes):
+def modifyImages(c, vertexes):
     cameras, images, points3D = read_model.read_model("/Users/jennydeng/Desktop/class/CSE586/CSE586/Project1", ".txt")
     width = cameras[1].width
     height = cameras[1].height
@@ -116,14 +130,18 @@ def to2D(c, vetexes):
     translation = numpy.array([[1, 0, 0, -1*c[0]], [0, 1, 0, -1*c[1]], [0, 0, 1, -1*c[2]], [0, 0, 0, 1]])
     presectiveProjection = numpy.array([[focus, 0, 0, 0], [0, focus, 0, 0], [0, 0, 1, 0]])
     for m in images:
-        plist = []
         R = qvec2rotmat(images[m].qvec)
         rotation = numpy.array([[R[0][0], R[0][1], R[0][2], 0], [R[1][0], R[1][1], R[1][2], 0], [R[2][0], R[2][1], R[2][2], 0], [0, 0, 0, 1]])
-        for v in vertexes:
-            worldPoint = numpy.array([[v[0]],[v[1]],[v[2]],[1]])
-            pixelLoc = numpy.matmul(numpy.matmul(numpy.matmul(fpToPixel, presectiveProjection), numpy.matmul(rotation, translation)), worldPoint)
-            plist.append(pixelLoc)
-        draw2D(images[m].id, plist)
+        to2D(m, vertexes, fpToPixel, presectiveProjection, rotation, translation)
+
+def to2D(img_id, vertexes, fpToPixel, rotation, translation):
+    plist = []
+    for v in vertexes:
+        worldPoint = numpy.array([[v[0]],[v[1]],[v[2]],[1]])
+        pixelLoc = numpy.matmul(numpy.matmul(numpy.matmul(fpToPixel, presectiveProjection), numpy.matmul(rotation, translation)), worldPoint)
+        plist.append(pixelLoc)
+    draw2D(images[m].id, plist)
+    print(plist)
 
 def draw2D(img_id, pixels):
     img = plt.imread('samples/'+str(img_id)+".jpg")
@@ -153,12 +171,14 @@ def draw2D(img_id, pixels):
 #print getDistance(a,b,c,d,[1,1,1])
 
 dic = getDict()
-count, para = randomChoose(dic, 0.1, 300)
+count, para = randomChoose(dic, 0.1, 500)
 print(count)
 print(para)
-plot3D(dic, para, 0.1)
+plot3D(dic, para, 0.1, '3Dplots.pdf')
+para2, dic2 = correctPlane(para, dic)
+plot3D(dic2, para2, 0.05, '3Dplots_modified.pdf')
 # vlist = drawBox(1)
-# to2D((0,0,0), vlist)
+# modifyImages((0,0,0), vlist)
 # draw2D(1,numpy.array([[3000,3500],[4000, 3500],[4866, 3200],[3866, 3200],[3000, 2500],[4000, 2500],[4866, 2200],[3866, 2200]]))
 
 #end
